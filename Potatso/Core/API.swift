@@ -47,7 +47,7 @@ struct API {
         _ = Alamofire.request(Path.ruleSet(uuid).url, method: .get, parameters: nil, encoding: URLEncoding.default).responseObject(completionHandler: callback)
     }
 
-    static func updateRuleSetListDetail(_ uuids: [String], callback: @escaping  (Alamofire.DataResponse<[RuleSet]>) -> Void) {
+    static func updateRuleSetListDetail(_ uuids: [String], callback: @escaping (Alamofire.DataResponse<[RuleSet]>) -> Void) {
         DDLogVerbose("API.updateRuleSetListDetail ===> uuids: \(uuids)")
         _ = Alamofire.request(Path.ruleSetListDetail().url, method: .post, parameters: ["uuids": uuids], encoding: JSONEncoding.default).responseArray(completionHandler: callback)
     }
@@ -62,19 +62,19 @@ extension RuleSet: Mappable {
             return
         }
         var rules: [Rule] = []
-        if let parsedObject = Mapper<Rule>().mapArray(JSONArray: rulesJSON as! [[String : Any]]){
-            rules.append(contentsOf: parsedObject)
-        }
+        let parsedObject = Mapper<Rule>().mapArray(JSONArray: rulesJSON as! [[String: Any]])
+        rules.append(contentsOf: parsedObject)
+
         self.rules = rules
     }
 
     // Mappable
     public func mapping(map: Map) {
-        uuid      <- map["id"]
-        name      <- map["name"]
-        createAt  <- (map["created_at"], DateTransform())
-        remoteUpdatedAt  <- (map["updated_at"], DateTransform())
-        desc      <- map["description"]
+        uuid <- map["id"]
+        name <- map["name"]
+        createAt <- (map["created_at"], DateTransform())
+        remoteUpdatedAt <- (map["updated_at"], DateTransform())
+        desc <- map["description"]
         ruleCount <- map["rule_count"]
         isOfficial <- map["is_official"]
     }
@@ -184,9 +184,9 @@ extension Alamofire.DataRequest {
             }
 
             if let object = object {
-                _ = Mapper<T>().map(JSON: JSONToMap as! [String : Any], toObject: object)
+                _ = Mapper<T>().map(JSON: JSONToMap as! [String: Any], toObject: object)
                 return .success(object)
-            } else if let parsedObject = Mapper<T>().map(JSON: JSONToMap as! [String : Any]){
+            } else if let parsedObject = Mapper<T>().map(JSON: JSONToMap as! [String: Any]) {
                 return .success(parsedObject)
             }
 
@@ -252,9 +252,9 @@ extension Alamofire.DataRequest {
             }
 
             if (JSONToMap != nil) {
-                if let parsedObject = Mapper<T>().mapArray(JSONArray: JSONToMap as! [[String : Any]]){
-                    return .success(parsedObject)
-                }
+                let parsedObject = Mapper<T>().mapArray(JSONArray: JSONToMap as! [[String: Any]])
+                return .success(parsedObject)
+
             }
 
             let failureReason = "ObjectMapper failed to serialize response."
